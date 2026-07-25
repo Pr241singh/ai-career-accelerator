@@ -1,0 +1,6 @@
+{
+  "name": "AI Career Accelerator",
+  "description": "An AI-powered career growth platform with resume analysis, voice-enabled mock interviews, career roadmaps, skill gap analysis, and job & internship recommendations.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
