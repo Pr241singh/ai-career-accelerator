@@ -1,1 +1,1 @@
-Ai Career Path
+Ai Career Path hackathon  project
