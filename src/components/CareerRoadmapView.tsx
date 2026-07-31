@@ -13,8 +13,11 @@ import {
   RefreshCw,
   Zap,
   Target,
-  Award
+  Award,
+  ChevronRight,
+  Flame
 } from 'lucide-react';
+import { AILoadingState } from './AILoadingState';
 
 interface CareerRoadmapViewProps {
   userProfile: UserProfile;
@@ -151,8 +154,21 @@ export const CareerRoadmapView: React.FC<CareerRoadmapViewProps> = ({ userProfil
         </div>
       </div>
 
+      {/* Loading Overlay */}
+      {loading && (
+        <AILoadingState
+          title="Career Roadmap Generation"
+          steps={[
+            'Analyzing prerequisites for ' + targetRole + '...',
+            'Structuring phased timeline & milestones...',
+            'Curating open-source & free documentation resources...',
+            'Building project deliverables for portfolio...'
+          ]}
+        />
+      )}
+
       {/* Roadmap Output */}
-      {roadmap ? (
+      {!loading && roadmap ? (
         <div className="space-y-6 animate-fade-in">
           {/* Progress Overview Card */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">

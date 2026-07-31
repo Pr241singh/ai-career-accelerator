@@ -19,6 +19,7 @@ import {
   Zap,
   Building
 } from 'lucide-react';
+import { AILoadingState } from './AILoadingState';
 
 interface MockInterviewerProps {
   userProfile: UserProfile;
@@ -273,7 +274,18 @@ export const MockInterviewer: React.FC<MockInterviewerProps> = ({ userProfile })
         </div>
 
         {/* Setup Configuration Card */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6 shadow-2xl border border-white/10">
+        {generatingQuestions ? (
+          <AILoadingState
+            title="Interview Simulation Engine"
+            steps={[
+              'Analyzing company & role difficulty level...',
+              'Generating STAR-format technical & behavioral questions...',
+              'Configuring speech recognition & voice synthesis parameters...',
+              'Launching interactive simulation session...'
+            ]}
+          />
+        ) : (
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6 shadow-2xl border border-white/10">
           <h3 className="text-lg font-extrabold text-white flex items-center space-x-2">
             <Sparkles className="w-5 h-5 text-sky-400" />
             <span>Configure Interview Parameters</span>
@@ -366,6 +378,7 @@ export const MockInterviewer: React.FC<MockInterviewerProps> = ({ userProfile })
             )}
           </button>
         </div>
+        )}
       </div>
     );
   }

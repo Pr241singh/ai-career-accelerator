@@ -15,6 +15,7 @@ import {
   BarChart2,
   Briefcase
 } from 'lucide-react';
+import { AILoadingState } from './AILoadingState';
 
 interface ResumeAnalyzerProps {
   userProfile: UserProfile;
@@ -296,8 +297,21 @@ export const ResumeAnalyzer: React.FC<ResumeAnalyzerProps> = ({ userProfile, onU
         </div>
       </div>
 
+      {/* Loading Overlay */}
+      {loading && (
+        <AILoadingState
+          title="ATS Resume Neural Audit"
+          steps={[
+            'Reading and parsing document typography & layout...',
+            'Comparing against ATS parsers & keyword density metrics...',
+            'Calculating role fit for ' + targetRole + '...',
+            'Writing STAR-method bullet point improvements...'
+          ]}
+        />
+      )}
+
       {/* Audit Results Presentation */}
-      {result && (
+      {!loading && result && (
         <div className="space-y-6 animate-fade-in">
           {/* Top Score Cards Banner */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
