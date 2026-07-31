@@ -142,25 +142,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthenticate }) => {
       <div className="fixed bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none z-0" />
 
       {/* Header Bar */}
-      <header className="border-b border-white/10 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 py-4 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setMode('landing')}>
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-slate-950 font-black shadow-lg neon-glow">
-              <Zap className="w-5 h-5 fill-current text-slate-950" />
+      <header className="border-b border-white/10 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 py-3 sm:py-4 px-3 sm:px-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer shrink-0 min-w-0" onClick={() => setMode('landing')}>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-slate-950 font-black shadow-lg neon-glow shrink-0">
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-current text-slate-950" />
             </div>
-            <div>
-              <span className="text-lg font-black text-white tracking-tight flex items-center space-x-2">
+            <div className="min-w-0">
+              <div className="text-sm sm:text-lg font-black text-white tracking-tight flex items-center space-x-1 sm:space-x-1.5 whitespace-nowrap">
                 <span>AI Career</span>
                 <span className="gradient-text">Accelerator</span>
-              </span>
-              <p className="text-[10px] text-sky-400 font-mono hidden sm:block">National Hackathon Edition</p>
+              </div>
+              <p className="text-[10px] text-sky-400 font-mono hidden md:block">National Hackathon Edition</p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
             <button
               onClick={() => setMode('login')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                 mode === 'login'
                   ? 'bg-slate-800 text-white border border-slate-700'
                   : 'text-slate-300 hover:text-white'
@@ -170,9 +170,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthenticate }) => {
             </button>
             <button
               onClick={() => setMode('signup')}
-              className="px-5 py-2 bg-gradient-to-r from-sky-500 via-indigo-500 to-violet-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-black rounded-xl text-xs shadow-lg neon-glow transition-all flex items-center space-x-1.5"
+              className="px-3 sm:px-5 py-1.5 sm:py-2 bg-gradient-to-r from-sky-500 via-indigo-500 to-violet-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-black rounded-xl text-xs shadow-lg neon-glow transition-all flex items-center space-x-1 sm:space-x-1.5 whitespace-nowrap"
             >
-              <UserPlus className="w-3.5 h-3.5 fill-current text-slate-950" />
+              <UserPlus className="w-3.5 h-3.5 fill-current text-slate-950 hidden xs:inline" />
               <span>Get Started Free</span>
             </button>
           </div>

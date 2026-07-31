@@ -136,7 +136,6 @@ export default function App() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <span>Powered by Google Gemini 3.6 Flash</span>
             <span className="text-slate-800">•</span>
             <span>National Hackathon Edition</span>
           </div>

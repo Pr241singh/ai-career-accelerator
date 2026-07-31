@@ -48,13 +48,13 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Brand */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-violet-600 flex items-center justify-center neon-glow text-slate-950 font-black shadow-lg">
-              <Zap className="w-5 h-5 fill-current text-slate-950" />
+          <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer shrink-0 min-w-0" onClick={() => setActiveTab('dashboard')}>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-violet-600 flex items-center justify-center neon-glow text-slate-950 font-black shadow-lg shrink-0">
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-current text-slate-950" />
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-black text-lg tracking-tight text-white">
+            <div className="min-w-0">
+              <div className="flex items-center space-x-1.5 whitespace-nowrap">
+                <span className="font-black text-xs sm:text-lg tracking-tight text-white">
                   AI CAREER <span className="gradient-text font-black">ACCELERATOR</span>
                 </span>
                 <span className="text-[9px] font-bold tracking-wider text-sky-400 bg-sky-950/80 border border-sky-800/60 px-2 py-0.5 rounded-full uppercase hidden sm:inline-block">
