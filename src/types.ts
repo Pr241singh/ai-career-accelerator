@@ -10,6 +10,11 @@ export interface UserProfile {
   resumeText: string;
   savedJobs: string[];
   savedRoadmaps: string[];
+  atsScore?: number;
+  skillGapScore?: number;
+  interviewScore?: number;
+  roadmapProgress?: number;
+  overallReadiness?: number;
   token?: string;
   createdAt?: string;
 }

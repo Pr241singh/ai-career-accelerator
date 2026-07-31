@@ -4,25 +4,16 @@ import { DEMO_PROFILES } from '../data/mockData';
 const USERS_STORAGE_KEY = 'ai_accelerator_users_v1';
 const ACTIVE_USER_ID_KEY = 'ai_accelerator_active_user_id_v1';
 
-// Initial default users list
-const DEFAULT_ACCOUNTS: UserProfile[] = [
-  DEMO_PROFILES.student,
-  DEMO_PROFILES.ai_enthusiast
-];
-
 // Helper to get all registered users from LocalStorage
 export function getRegisteredUsers(): UserProfile[] {
   try {
     const data = localStorage.getItem(USERS_STORAGE_KEY);
-    if (!data) {
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_ACCOUNTS));
-      return DEFAULT_ACCOUNTS;
-    }
+    if (!data) return [];
     const parsed = JSON.parse(data);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_ACCOUNTS;
+    return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
     console.error('Failed to parse registered users from LocalStorage', e);
-    return DEFAULT_ACCOUNTS;
+    return [];
   }
 }
 
@@ -44,9 +35,34 @@ export function getActiveUserProfile(): UserProfile {
       const found = users.find(u => u.id === activeId);
       if (found) return found;
     }
-    return users[0] || DEMO_PROFILES.student;
+    // Return clean candidate template if none active
+    return {
+      id: 'candidate-new',
+      name: 'New Candidate',
+      email: '',
+      targetRole: 'Full Stack Web Developer',
+      experienceLevel: 'Entry-Level / Student / Fresher',
+      yearsOfExperience: 0,
+      currentSkills: ['React', 'JavaScript', 'HTML5', 'CSS3'],
+      resumeText: '',
+      savedJobs: [],
+      savedRoadmaps: [],
+      createdAt: new Date().toISOString()
+    };
   } catch (e) {
-    return DEMO_PROFILES.student;
+    return {
+      id: 'candidate-new',
+      name: 'New Candidate',
+      email: '',
+      targetRole: 'Full Stack Web Developer',
+      experienceLevel: 'Entry-Level / Student / Fresher',
+      yearsOfExperience: 0,
+      currentSkills: ['React', 'JavaScript', 'HTML5', 'CSS3'],
+      resumeText: '',
+      savedJobs: [],
+      savedRoadmaps: [],
+      createdAt: new Date().toISOString()
+    };
   }
 }
 
@@ -73,21 +89,6 @@ export function registerNewUser(data: {
   
   // Check if user with same email exists
   const existingIndex = users.findIndex(u => u.email.toLowerCase() === data.email.toLowerCase());
-  
-  const defaultResume = `${data.name.toUpperCase()}
-Email: ${data.email} | Target Role: ${data.targetRole} | Experience: ${data.experienceLevel}
-
-SUMMARY
-Motivated candidate aiming for a ${data.targetRole} position. Skilled in ${data.currentSkills.join(', ')}.
-
-SKILLS & CORE COMPETENCIES
-- Key Technical Skills: ${data.currentSkills.join(', ')}
-- Professional Focus: ${data.targetRole}
-
-EXPERIENCE & PROJECTS
-- Project Developer | Key Highlights
-  * Designed and built web applications using ${data.currentSkills.slice(0, 3).join(', ') || 'Modern Tech Stack'}.
-  * Demonstrated problem solving, API integration, and clean code principles.`;
 
   const newUser: UserProfile = {
     id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
@@ -97,8 +98,8 @@ EXPERIENCE & PROJECTS
     targetRole: data.targetRole || 'Full Stack Web Developer',
     experienceLevel: data.experienceLevel || 'Entry-Level / Student / Fresher',
     yearsOfExperience: data.experienceLevel.includes('Senior') ? 5 : data.experienceLevel.includes('Mid') ? 3 : 0,
-    currentSkills: data.currentSkills.length > 0 ? data.currentSkills : ['JavaScript', 'React', 'HTML', 'CSS', 'Git'],
-    resumeText: data.resumeText || defaultResume,
+    currentSkills: data.currentSkills || ['JavaScript', 'React', 'HTML', 'CSS'],
+    resumeText: data.resumeText ? data.resumeText.trim() : '',
     savedJobs: [],
     savedRoadmaps: [],
     createdAt: new Date().toISOString()

@@ -37,7 +37,12 @@ IT Student Assistant | University Tech Library | Sept 2024 - Present
 - Assisted students and faculty with technical troubleshooting and software installations.
 - Managed inventory of lab computers and resolved network printer issues.`,
     savedJobs: ['job-1', 'job-3'],
-    savedRoadmaps: []
+    savedRoadmaps: [],
+    atsScore: 84,
+    skillGapScore: 78,
+    interviewScore: 80,
+    roadmapProgress: 4,
+    overallReadiness: 81
   },
 
   ai_enthusiast: {
@@ -66,7 +71,12 @@ AI Software Engineering Intern | DataPulse Labs | Jun 2025 - Dec 2025
 - Optimized vector similarity search latency from 800ms to 120ms by implementing PGVector indexing.
 - Authored automated test scripts for ML model validation with 92% code coverage.`,
     savedJobs: ['job-2', 'job-5'],
-    savedRoadmaps: []
+    savedRoadmaps: [],
+    atsScore: 92,
+    skillGapScore: 88,
+    interviewScore: 85,
+    roadmapProgress: 5,
+    overallReadiness: 89
   }
 };
 

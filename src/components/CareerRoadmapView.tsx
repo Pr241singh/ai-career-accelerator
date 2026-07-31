@@ -21,9 +21,10 @@ import { AILoadingState } from './AILoadingState';
 
 interface CareerRoadmapViewProps {
   userProfile: UserProfile;
+  onProfileChange?: (profile: UserProfile) => void;
 }
 
-export const CareerRoadmapView: React.FC<CareerRoadmapViewProps> = ({ userProfile }) => {
+export const CareerRoadmapView: React.FC<CareerRoadmapViewProps> = ({ userProfile, onProfileChange }) => {
   const [targetRole, setTargetRole] = useState<string>(userProfile.targetRole || 'Full Stack Developer');
   const [hoursPerWeek, setHoursPerWeek] = useState<number>(12);
   const [loading, setLoading] = useState<boolean>(false);
@@ -48,6 +49,13 @@ export const CareerRoadmapView: React.FC<CareerRoadmapViewProps> = ({ userProfil
 
       const data = await res.json();
       setRoadmap(data);
+      const initialDone = data.milestones ? data.milestones.filter((m: any) => m.completed).length : 0;
+      if (onProfileChange) {
+        onProfileChange({
+          ...userProfile,
+          roadmapProgress: Math.max(1, initialDone)
+        });
+      }
     } catch (err) {
       console.error('Roadmap generation error:', err);
       alert('Failed to generate roadmap. Please try again.');
@@ -75,10 +83,18 @@ export const CareerRoadmapView: React.FC<CareerRoadmapViewProps> = ({ userProfil
       return m;
     });
 
+    const countDone = updatedMilestones.filter(m => m.completed).length;
     setRoadmap({
       ...roadmap,
       milestones: updatedMilestones
     });
+
+    if (onProfileChange) {
+      onProfileChange({
+        ...userProfile,
+        roadmapProgress: countDone
+      });
+    }
   };
 
   const completedCount = roadmap?.milestones.filter(m => m.completed).length || 0;

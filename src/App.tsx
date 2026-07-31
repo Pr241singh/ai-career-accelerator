@@ -92,19 +92,29 @@ export default function App() {
           <ResumeAnalyzer
             userProfile={userProfile}
             onUpdateResumeText={handleUpdateResumeText}
+            onProfileChange={handleProfileChange}
           />
         )}
 
         {activeTab === 'interview' && (
-          <MockInterviewer userProfile={userProfile} />
+          <MockInterviewer
+            userProfile={userProfile}
+            onProfileChange={handleProfileChange}
+          />
         )}
 
         {activeTab === 'roadmap' && (
-          <CareerRoadmapView userProfile={userProfile} />
+          <CareerRoadmapView
+            userProfile={userProfile}
+            onProfileChange={handleProfileChange}
+          />
         )}
 
         {activeTab === 'skillgap' && (
-          <SkillGapAnalyzer userProfile={userProfile} />
+          <SkillGapAnalyzer
+            userProfile={userProfile}
+            onProfileChange={handleProfileChange}
+          />
         )}
 
         {activeTab === 'coverletter' && (
@@ -126,6 +136,7 @@ export default function App() {
           </div>
 
           <div className="flex items-center space-x-4">
+            <span>Powered by Google Gemini 3.6 Flash</span>
             <span className="text-slate-800">•</span>
             <span>National Hackathon Edition</span>
           </div>

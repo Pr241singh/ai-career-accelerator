@@ -43,7 +43,7 @@ export const CoverLetterGenerator: React.FC<CoverLetterGeneratorProps> = ({ user
           targetRole,
           companyName,
           jobDescription,
-          userSkills: userProfile.currentSkills,
+          userSkills: Array.isArray(userProfile?.currentSkills) ? userProfile.currentSkills : [],
           tone
         })
       });

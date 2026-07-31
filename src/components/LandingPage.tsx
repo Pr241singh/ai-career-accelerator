@@ -104,17 +104,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthenticate }) => {
     if (found) {
       onAuthenticate(found);
     } else {
-      // Auto-create new account for seamless entry
-      const newProfile = registerNewUser({
-        name: loginEmail.split('@')[0] || 'New Member',
-        email: loginEmail.trim(),
-        password: loginPassword.trim() || 'password123',
-        targetRole: 'Full Stack Web Developer',
-        experienceLevel: 'Entry-Level / Student / Fresher',
-        currentSkills: ['React', 'JavaScript', 'Node.js', 'HTML5', 'CSS3']
-      });
-
-      onAuthenticate(newProfile);
+      setFormError('Account not found. Please create an account first.');
     }
   };
 
@@ -133,8 +123,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthenticate }) => {
   const handleDemoProfile = (presetKey: 'student' | 'ai_enthusiast') => {
     const profile = DEMO_PROFILES[presetKey];
     if (profile) {
-      saveRegisteredUsers([profile]);
-      onAuthenticate(profile);
+      const demoProfileWithMetrics: UserProfile = {
+        ...profile,
+        atsScore: profile.atsScore || 84,
+        skillGapScore: profile.skillGapScore || 78,
+        interviewScore: profile.interviewScore || 80,
+        roadmapProgress: profile.roadmapProgress || 4,
+        overallReadiness: profile.overallReadiness || 81
+      };
+      onAuthenticate(demoProfileWithMetrics);
     }
   };
 
@@ -507,11 +504,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onAuthenticate }) => {
           <div className="flex items-center space-x-2">
             <Zap className="w-4 h-4 text-sky-400" />
             <span className="font-bold text-slate-300">AI Career Accelerator</span>
-            <span>- Hackathon Edition</span>
+            <span>— Hackathon Edition</span>
           </div>
 
           <div className="flex items-center space-x-4">
-            <span>Made by Preeti Singh</span>
+            <span>Powered by Google Gemini 2.5 Flash</span>
           </div>
         </div>
       </footer>

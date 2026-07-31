@@ -21,9 +21,10 @@ import { AILoadingState } from './AILoadingState';
 
 interface SkillGapAnalyzerProps {
   userProfile: UserProfile;
+  onProfileChange?: (profile: UserProfile) => void;
 }
 
-export const SkillGapAnalyzer: React.FC<SkillGapAnalyzerProps> = ({ userProfile }) => {
+export const SkillGapAnalyzer: React.FC<SkillGapAnalyzerProps> = ({ userProfile, onProfileChange }) => {
   const [targetRole, setTargetRole] = useState<string>(userProfile.targetRole || 'Full Stack Developer');
   const [skillInput, setSkillInput] = useState<string>('');
   const [skillsList, setSkillsList] = useState<string[]>(userProfile.currentSkills || ['React', 'JavaScript', 'HTML5', 'CSS3', 'Node.js']);
@@ -60,6 +61,12 @@ export const SkillGapAnalyzer: React.FC<SkillGapAnalyzerProps> = ({ userProfile 
 
       const data: SkillGapAnalysis = await res.json();
       setResult(data);
+      if (onProfileChange) {
+        onProfileChange({
+          ...userProfile,
+          skillGapScore: data.gapScore
+        });
+      }
     } catch (err) {
       console.error('Skill gap error:', err);
       alert('Error analyzing skill gap. Please try again.');

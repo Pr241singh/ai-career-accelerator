@@ -154,7 +154,11 @@ app.post('/api/parse-resume-file', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'No file content uploaded.' });
     }
 
+    // Clean base64 string (strip data URI prefix and any whitespace/newlines)
+    const cleanBase64 = fileBase64.replace(/^data:[^;]+;base64,/, '').replace(/\s+/g, '');
+
     const isPdf = fileType.includes('pdf') || fileName.toLowerCase().endsWith('.pdf');
+    const isDocx = fileType.includes('word') || fileName.toLowerCase().endsWith('.docx') || fileName.toLowerCase().endsWith('.doc');
     const isTxtOrMd =
       fileType.includes('text') ||
       fileType.includes('json') ||
@@ -164,13 +168,23 @@ app.post('/api/parse-resume-file', async (req: Request, res: Response) => {
       fileName.toLowerCase().endsWith('.rtf');
 
     if (isTxtOrMd) {
-      const decodedText = Buffer.from(fileBase64, 'base64').toString('utf-8');
-      return res.json({ text: decodedText });
+      const decodedText = Buffer.from(cleanBase64, 'base64').toString('utf-8').trim();
+      // Ensure we don't return raw binary headers if mistagged
+      if (!decodedText.startsWith('%PDF-') && !decodedText.includes('PK\x03\x04')) {
+        return res.json({ text: decodedText });
+      }
     }
 
     // For PDF and DOCX, use Gemini Multimodal extraction
     const ai = getGeminiClient();
-    const mimeType = isPdf ? 'application/pdf' : fileType || 'application/octet-stream';
+    let mimeType = 'application/pdf';
+    if (isDocx) {
+      mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    } else if (isPdf) {
+      mimeType = 'application/pdf';
+    } else {
+      mimeType = fileType || 'application/octet-stream';
+    }
 
     const response = await ai.models.generateContent({
       model: 'gemini-3.6-flash',
@@ -178,31 +192,23 @@ app.post('/api/parse-resume-file', async (req: Request, res: Response) => {
         {
           inlineData: {
             mimeType,
-            data: fileBase64
+            data: cleanBase64
           }
         },
         'Extract all plain text content from this resume document accurately, maintaining section headings, experience points, education, contact details, and bullet points. Output ONLY the raw extracted resume text with no commentary or intro.'
       ]
     });
 
-    const extractedText = response.text || '';
-    if (!extractedText.trim()) {
-      // Fallback decode if empty
-      const fallback = Buffer.from(fileBase64, 'base64').toString('utf-8').replace(/[^\x20-\x7E\n\r\t]/g, ' ');
-      return res.json({ text: fallback.trim() });
+    const extractedText = (response.text || '').trim();
+    if (extractedText && !extractedText.startsWith('%PDF-') && !extractedText.includes('PK\x03\x04')) {
+      return res.json({ text: extractedText });
     }
 
-    return res.json({ text: extractedText.trim() });
+    return res.status(400).json({
+      error: 'Could not extract readable text from document. Please copy & paste your resume text directly.'
+    });
   } catch (error: any) {
     console.error('Error parsing uploaded resume file:', error);
-    // Fallback attempts
-    try {
-      const fallback = Buffer.from(req.body.fileBase64 || '', 'base64').toString('utf-8').replace(/[^\x20-\x7E\n\r\t]/g, ' ');
-      if (fallback.trim().length > 30) {
-        return res.json({ text: fallback.trim() });
-      }
-    } catch (_) {}
-
     return res.status(500).json({
       error: 'Could not extract text from document. Please copy & paste your resume text directly.',
       details: error.message || String(error)
@@ -215,13 +221,18 @@ app.post('/api/ai/interview/generate-questions', async (req: Request, res: Respo
   try {
     const { targetRole = 'Full Stack Developer', companyTarget = 'Top Tech Companies', category = 'Mixed', difficulty = 'Intermediate' } = req.body;
 
+    const safeTargetRole = targetRole || 'Full Stack Developer';
+    const safeCompanyTarget = companyTarget || 'Top Tech Companies';
+    const safeCategory = category || 'Mixed';
+    const safeDifficulty = difficulty || 'Intermediate';
+
     const ai = getGeminiClient();
 
     const prompt = `Generate a set of 5 realistic, high-value interview questions for a candidate applying for:
-Target Role: "${targetRole}"
-Target Company Context: "${companyTarget}"
-Category Focus: "${category}" (Technical, Behavioral, Problem Solving, HR, or Mixed)
-Difficulty Level: "${difficulty}"
+Target Role: "${safeTargetRole}"
+Target Company Context: "${safeCompanyTarget}"
+Category Focus: "${safeCategory}" (Technical, Behavioral, Problem Solving, HR, or Mixed)
+Difficulty Level: "${safeDifficulty}"
 
 Each question should test practical industry skills or STAR behavioral scenarios. Provide clear model answers and key talking points for evaluation.`;
 
@@ -251,7 +262,11 @@ Each question should test practical industry skills or STAR behavioral scenarios
       }
     });
 
-    const questions = JSON.parse(response.text || '[]');
+    let text = (response.text || '').trim();
+    if (text.startsWith('```json')) text = text.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    else if (text.startsWith('```')) text = text.replace(/^```\s*/, '').replace(/\s*```$/, '');
+
+    const questions = JSON.parse(text || '[]');
     return res.json({ questions });
   } catch (error: any) {
     console.error('Error in generate-questions:', error);
@@ -497,13 +512,18 @@ app.post('/api/ai/cover-letter', async (req: Request, res: Response) => {
   try {
     const { targetRole = 'Software Engineer', companyName = 'Innovate Tech', jobDescription = '', userSkills = [], tone = 'Professional' } = req.body;
 
+    const safeUserSkills = Array.isArray(userSkills) ? userSkills : [];
+    const safeTargetRole = targetRole || 'Software Engineer';
+    const safeCompanyName = companyName || 'Innovate Tech';
+    const safeTone = tone || 'Professional';
+
     const ai = getGeminiClient();
 
     const prompt = `Write a compelling, customized Cover Letter for a job application.
-Candidate Target Role: "${targetRole}"
-Company Name: "${companyName}"
-Selected Tone: "${tone}" (Professional, Enthusiastic, Technical, or Concise)
-Candidate Skills: ${userSkills.join(', ')}
+Candidate Target Role: "${safeTargetRole}"
+Company Name: "${safeCompanyName}"
+Selected Tone: "${safeTone}" (Professional, Enthusiastic, Technical, or Concise)
+Candidate Skills: ${safeUserSkills.join(', ')}
 ${jobDescription ? `Job Description Context: "${jobDescription}"` : ''}
 
 Make it modern, persuasive, concise (approx 250-350 words), avoiding boilerplate SaaS cliché phrases. Highlight key projects and enthusiasm for the team's engineering culture.`;

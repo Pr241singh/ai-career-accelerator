@@ -161,22 +161,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       }, 1000);
     } else {
-      // Auto-register if user doesn't exist yet!
-      const autoRegistered = registerNewUser({
-        name: loginEmail.split('@')[0] || 'New Member',
-        email: loginEmail.trim(),
-        password: loginPassword.trim() || 'password123',
-        targetRole: 'Full Stack Web Developer',
-        experienceLevel: 'Entry-Level / Student / Fresher',
-        currentSkills: ['React', 'JavaScript', 'Node.js', 'HTML5', 'CSS3']
-      });
-
-      onProfileChange(autoRegistered);
-      setSuccessMessage(`New account created for ${loginEmail.trim()}! Welcome aboard.`);
-      setTimeout(() => {
-        setSuccessMessage('');
-        onClose();
-      }, 1200);
+      setLoginError('Account not found. Please create an account first.');
     }
   };
 

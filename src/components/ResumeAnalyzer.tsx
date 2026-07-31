@@ -20,9 +20,10 @@ import { AILoadingState } from './AILoadingState';
 interface ResumeAnalyzerProps {
   userProfile: UserProfile;
   onUpdateResumeText: (text: string) => void;
+  onProfileChange?: (profile: UserProfile) => void;
 }
 
-export const ResumeAnalyzer: React.FC<ResumeAnalyzerProps> = ({ userProfile, onUpdateResumeText }) => {
+export const ResumeAnalyzer: React.FC<ResumeAnalyzerProps> = ({ userProfile, onUpdateResumeText, onProfileChange }) => {
   const [resumeText, setResumeText] = useState<string>(userProfile.resumeText || '');
   const [targetRole, setTargetRole] = useState<string>(userProfile.targetRole || 'Full Stack Developer');
   const [experienceLevel, setExperienceLevel] = useState<string>(userProfile.experienceLevel || 'Entry-Level');
@@ -66,11 +67,15 @@ export const ResumeAnalyzer: React.FC<ResumeAnalyzerProps> = ({ userProfile, onU
         }
 
         const data = await res.json();
-        if (data.text) {
+        if (!res.ok || data.error) {
+          throw new Error(data.error || data.details || 'Failed to parse resume document.');
+        }
+
+        if (data.text && !data.text.startsWith('%PDF-') && !data.text.includes('PK\x03\x04')) {
           setResumeText(data.text);
           onUpdateResumeText(data.text);
         } else {
-          throw new Error('No readable text could be extracted from document.');
+          throw new Error('Could not extract readable text from document. Please copy & paste your resume text directly.');
         }
         setUploading(false);
       };
@@ -143,6 +148,13 @@ export const ResumeAnalyzer: React.FC<ResumeAnalyzerProps> = ({ userProfile, onU
 
       const data: ResumeAnalysisResult = await res.json();
       setResult(data);
+      if (onProfileChange) {
+        onProfileChange({
+          ...userProfile,
+          atsScore: data.atsScore,
+          resumeText
+        });
+      }
     } catch (err: any) {
       console.error('Resume Analysis Error:', err);
       setErrorMsg(err.message || 'Error communicating with AI service.');

@@ -30,17 +30,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   setActiveTab,
   onOpenAuthModal
 }) => {
-  // Compute key stats based on user profile
-  const skillCount = userProfile.currentSkills.length;
-  const targetRole = userProfile.targetRole || 'Full Stack Developer';
-  
-  // Dynamic scores for visual impact
-  const atsScore = userProfile.resumeText.length > 200 ? 84 : 68;
-  const skillMatchScore = Math.min(95, Math.max(55, skillCount * 12 + 25));
-  const interviewScore = 80;
-  const roadmapProgress = 4;
-  const totalRoadmap = 7;
-  const readinessOverall = Math.round((atsScore + skillMatchScore + interviewScore) / 3);
+  // Compute dynamic stats based on user profile
+  const targetRole = userProfile.targetRole || 'Full Stack Web Developer';
+
+  let completedCount = 0;
+  let totalScorePoints = 0;
+
+  if (typeof userProfile.atsScore === 'number') {
+    completedCount++;
+    totalScorePoints += userProfile.atsScore;
+  }
+  if (typeof userProfile.skillGapScore === 'number') {
+    completedCount++;
+    totalScorePoints += userProfile.skillGapScore;
+  }
+  if (typeof userProfile.interviewScore === 'number') {
+    completedCount++;
+    totalScorePoints += userProfile.interviewScore;
+  }
+  if (typeof userProfile.roadmapProgress === 'number' && userProfile.roadmapProgress > 0) {
+    completedCount++;
+    const rmScore = Math.min(100, Math.round((userProfile.roadmapProgress / 7) * 100));
+    totalScorePoints += rmScore;
+  }
+
+  const readinessOverall = completedCount > 0
+    ? Math.round((totalScorePoints / completedCount) * (completedCount / 4))
+    : (userProfile.overallReadiness || 0);
 
   const quickTools = [
     {
@@ -158,16 +174,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Metric 1 */}
+        {/* Metric 1: Overall Readiness */}
         <div className="glass-panel p-5 rounded-2xl border border-white/10 bg-slate-900/80 space-y-3 relative overflow-hidden group hover:border-sky-500/40 transition-all">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
             <span>Overall Readiness</span>
             <Award className="w-4 h-4 text-sky-400" />
           </div>
-          <div className="flex items-baseline justify-between">
+          <div className="flex flex-col justify-between space-y-1">
             <span className="text-3xl font-black text-white">{readinessOverall}%</span>
-            <span className="text-xs font-bold text-emerald-400 flex items-center">
-              <TrendingUp className="w-3 h-3 mr-0.5" /> High
+            <span className="text-[11px] font-medium text-slate-400">
+              {readinessOverall === 0 ? 'Upload your resume to begin.' : 'Role Readiness Level'}
             </span>
           </div>
           <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
@@ -178,74 +194,110 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
 
-        {/* Metric 2 */}
-        <div className="glass-panel p-5 rounded-2xl border border-white/10 bg-slate-900/80 space-y-3 relative overflow-hidden group hover:border-sky-500/40 transition-all">
+        {/* Metric 2: ATS Resume */}
+        <div
+          onClick={() => setActiveTab('resume')}
+          className="glass-panel p-5 rounded-2xl border border-white/10 bg-slate-900/80 space-y-3 relative overflow-hidden group hover:border-sky-500/40 transition-all cursor-pointer"
+        >
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>ATS Resume Score</span>
+            <span>ATS Resume</span>
             <FileText className="w-4 h-4 text-indigo-400" />
           </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-black text-white">{atsScore}/100</span>
-            <span className="text-[11px] text-slate-400 font-mono">Target: 85+</span>
+          <div className="flex flex-col justify-between space-y-1">
+            <span className="text-2xl sm:text-3xl font-black text-white">
+              {typeof userProfile.atsScore === 'number' ? `${userProfile.atsScore}/100` : 'Not Generated'}
+            </span>
+            <span className="text-[11px] text-sky-400 font-semibold group-hover:underline flex items-center">
+              {typeof userProfile.atsScore === 'number' ? 'ATS Analyzed' : 'Analyze Resume →'}
+            </span>
           </div>
           <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
             <div
               className="bg-gradient-to-r from-indigo-500 to-violet-500 h-2 rounded-full transition-all duration-1000"
-              style={{ width: `${atsScore}%` }}
+              style={{ width: typeof userProfile.atsScore === 'number' ? `${userProfile.atsScore}%` : '0%' }}
             />
           </div>
         </div>
 
-        {/* Metric 3 */}
-        <div className="glass-panel p-5 rounded-2xl border border-white/10 bg-slate-900/80 space-y-3 relative overflow-hidden group hover:border-sky-500/40 transition-all">
+        {/* Metric 3: Skill Gap */}
+        <div
+          onClick={() => setActiveTab('skillgap')}
+          className="glass-panel p-5 rounded-2xl border border-white/10 bg-slate-900/80 space-y-3 relative overflow-hidden group hover:border-sky-500/40 transition-all cursor-pointer"
+        >
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>Skill Gap Coverage</span>
+            <span>Skill Gap</span>
             <BarChart3 className="w-4 h-4 text-violet-400" />
           </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-black text-white">{skillMatchScore}%</span>
-            <span className="text-[11px] text-sky-400 font-mono">{skillCount} Skills</span>
+          <div className="flex flex-col justify-between space-y-1">
+            <span className="text-2xl sm:text-3xl font-black text-white">
+              {typeof userProfile.skillGapScore === 'number' ? `${userProfile.skillGapScore}%` : 'Not Analyzed'}
+            </span>
+            <span className="text-[11px] text-indigo-400 font-semibold group-hover:underline flex items-center">
+              {typeof userProfile.skillGapScore === 'number' ? 'Skill Match' : 'Run Analysis →'}
+            </span>
           </div>
           <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
             <div
               className="bg-gradient-to-r from-violet-500 to-purple-500 h-2 rounded-full transition-all duration-1000"
-              style={{ width: `${skillMatchScore}%` }}
+              style={{ width: typeof userProfile.skillGapScore === 'number' ? `${userProfile.skillGapScore}%` : '0%' }}
             />
           </div>
         </div>
 
-        {/* Metric 4 */}
-        <div className="glass-panel p-5 rounded-2xl border border-white/10 bg-slate-900/80 space-y-3 relative overflow-hidden group hover:border-sky-500/40 transition-all">
+        {/* Metric 4: Interview */}
+        <div
+          onClick={() => setActiveTab('interview')}
+          className="glass-panel p-5 rounded-2xl border border-white/10 bg-slate-900/80 space-y-3 relative overflow-hidden group hover:border-sky-500/40 transition-all cursor-pointer"
+        >
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>Interview Index</span>
+            <span>Interview</span>
             <Mic className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-black text-white">{interviewScore}/100</span>
-            <span className="text-[11px] text-emerald-400 font-semibold">Voice Ready</span>
+          <div className="flex flex-col justify-between space-y-1">
+            <span className="text-2xl sm:text-3xl font-black text-white">
+              {typeof userProfile.interviewScore === 'number' ? `${userProfile.interviewScore}/100` : 'Not Attempted'}
+            </span>
+            <span className="text-[11px] text-emerald-400 font-semibold group-hover:underline flex items-center">
+              {typeof userProfile.interviewScore === 'number' ? 'Voice Ready' : 'Start Interview →'}
+            </span>
           </div>
           <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
             <div
               className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all duration-1000"
-              style={{ width: `${interviewScore}%` }}
+              style={{ width: typeof userProfile.interviewScore === 'number' ? `${userProfile.interviewScore}%` : '0%' }}
             />
           </div>
         </div>
 
-        {/* Metric 5 */}
-        <div className="glass-panel p-5 rounded-2xl border border-white/10 bg-slate-900/80 space-y-3 relative overflow-hidden group hover:border-sky-500/40 transition-all sm:col-span-2 lg:col-span-1">
+        {/* Metric 5: Roadmap */}
+        <div
+          onClick={() => setActiveTab('roadmap')}
+          className="glass-panel p-5 rounded-2xl border border-white/10 bg-slate-900/80 space-y-3 relative overflow-hidden group hover:border-sky-500/40 transition-all cursor-pointer sm:col-span-2 lg:col-span-1"
+        >
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>Roadmap Progress</span>
+            <span>Roadmap</span>
             <Map className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-black text-white">{roadmapProgress}/{totalRoadmap}</span>
-            <span className="text-[11px] text-amber-400 font-semibold">Milestones</span>
+          <div className="flex flex-col justify-between space-y-1">
+            <span className="text-2xl sm:text-3xl font-black text-white">
+              {typeof userProfile.roadmapProgress === 'number' && userProfile.roadmapProgress > 0
+                ? `${userProfile.roadmapProgress} / 7`
+                : '0 / 7'}
+            </span>
+            <span className="text-[11px] text-amber-400 font-semibold group-hover:underline flex items-center">
+              {typeof userProfile.roadmapProgress === 'number' && userProfile.roadmapProgress > 0
+                ? 'Active Steps'
+                : 'Generate Roadmap →'}
+            </span>
           </div>
           <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
             <div
               className="bg-gradient-to-r from-amber-500 to-orange-500 h-2 rounded-full transition-all duration-1000"
-              style={{ width: `${(roadmapProgress / totalRoadmap) * 100}%` }}
+              style={{
+                width: typeof userProfile.roadmapProgress === 'number' && userProfile.roadmapProgress > 0
+                  ? `${Math.round((userProfile.roadmapProgress / 7) * 100)}%`
+                  : '0%'
+              }}
             />
           </div>
         </div>

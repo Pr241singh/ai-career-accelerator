@@ -23,9 +23,10 @@ import { AILoadingState } from './AILoadingState';
 
 interface MockInterviewerProps {
   userProfile: UserProfile;
+  onProfileChange?: (profile: UserProfile) => void;
 }
 
-export const MockInterviewer: React.FC<MockInterviewerProps> = ({ userProfile }) => {
+export const MockInterviewer: React.FC<MockInterviewerProps> = ({ userProfile, onProfileChange }) => {
   // Setup config
   const [targetRole, setTargetRole] = useState<string>(userProfile.targetRole || 'Full Stack Developer');
   const [companyTarget, setCompanyTarget] = useState<string>('FAANG / Tech Startup');
@@ -86,10 +87,10 @@ export const MockInterviewer: React.FC<MockInterviewerProps> = ({ userProfile })
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          targetRole,
-          companyTarget,
-          category,
-          difficulty
+          targetRole: targetRole || userProfile?.targetRole || 'Full Stack Developer',
+          companyTarget: companyTarget || 'FAANG / Tech Startup',
+          category: category || 'Mixed',
+          difficulty: difficulty || 'Intermediate'
         })
       });
 
@@ -217,6 +218,19 @@ export const MockInterviewer: React.FC<MockInterviewerProps> = ({ userProfile })
         ...session,
         questions: updatedQuestions
       });
+
+      const evaluatedScores = updatedQuestions
+        .map(q => q.score)
+        .filter((s): s is number => typeof s === 'number');
+      if (evaluatedScores.length > 0 && onProfileChange) {
+        const avgScore = Math.round(
+          evaluatedScores.reduce((a, b) => a + b, 0) / evaluatedScores.length
+        );
+        onProfileChange({
+          ...userProfile,
+          interviewScore: avgScore
+        });
+      }
     } catch (err) {
       console.error('Answer evaluation error:', err);
       alert('Could not evaluate answer. Please retry.');
